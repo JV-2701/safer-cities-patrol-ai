@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Search, Clock, User, CheckCircle, AlertCircle, Loader2, FileText, Shiel
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 
-// Mock complaint data with enhanced blockchain details
 const mockComplaintData = {
   id: "SP-2025-04-782",
   type: "Theft",
@@ -39,7 +37,6 @@ const CitizenTrack = () => {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Check if case ID is in URL parameters
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const idFromUrl = params.get("id");
@@ -63,7 +60,6 @@ const CitizenTrack = () => {
     setLoading(true);
     setError(null);
     
-    // Simulate API call
     setTimeout(() => {
       if (searchId.startsWith("SP-")) {
         setComplaint(mockComplaintData);
@@ -84,7 +80,6 @@ const CitizenTrack = () => {
     }, 1500);
   };
 
-  // Helper to render the status badge
   const renderStatusBadge = (status: string) => {
     const getStatusClasses = (status: string) => {
       switch (status) {
@@ -252,7 +247,10 @@ const CitizenTrack = () => {
             </Card>
             
             <div className="flex space-x-3">
-              <Button className="flex-1" variant="outline" className="bg-police-700 hover:bg-police-600 border-police-600">
+              <Button 
+                className="flex-1 bg-police-700 hover:bg-police-600 border-police-600" 
+                variant="outline"
+              >
                 <FileText className="h-4 w-4 mr-2" />
                 Download Report
               </Button>
