@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,7 @@ import NotFound from "./pages/NotFound";
 
 // Citizen Pages
 import CitizenLogin from "./pages/citizen/Login";
+import CitizenRegister from "./pages/citizen/Register";
 import CitizenDashboard from "./pages/citizen/Dashboard";
 import CitizenComplaint from "./pages/citizen/Complaint";
 import CitizenTrack from "./pages/citizen/Track";
@@ -18,6 +20,7 @@ import CitizenGallery from "./pages/citizen/Gallery";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/Login";
+import AdminRegister from "./pages/admin/Register";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminComplaints from "./pages/admin/Complaints";
 import AdminPatrols from "./pages/admin/Patrols";
@@ -39,6 +42,7 @@ const App = () => (
           
           {/* Citizen Routes */}
           <Route path="/citizen/login" element={<CitizenLogin />} />
+          <Route path="/citizen/register" element={<CitizenRegister />} />
           <Route path="/citizen/dashboard" element={<CitizenDashboard />} />
           <Route path="/citizen/complaint" element={<CitizenComplaint />} />
           <Route path="/citizen/track" element={<CitizenTrack />} />
@@ -49,6 +53,7 @@ const App = () => (
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/register" element={<AdminRegister />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/complaints" element={<AdminComplaints />} />
           <Route path="/admin/patrols" element={<AdminPatrols />} />
