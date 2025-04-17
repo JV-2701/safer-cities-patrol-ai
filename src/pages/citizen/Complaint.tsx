@@ -12,20 +12,67 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, MessageSquare, MapPin, FileText, AlertTriangle } from "lucide-react";
+import { Upload, MessageSquare, MapPin, FileText, AlertTriangle, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const CitizenComplaint = () => {
   const [complaintType, setComplaintType] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [blockchainHash, setBlockchainHash] = useState("");
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const generateBlockchainHash = () => {
+    // In a real app, this would interact with a blockchain system
+    // For demo, generate a random hash
+    const characters = "0123456789abcdef";
+    let hash = "0x";
+    for (let i = 0; i < 64; i++) {
+      hash += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return hash;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, we would submit the form data to an API
-    console.log({ complaintType, location, description, useCurrentLocation });
-    // Show success message
-    alert("Complaint submitted successfully! Your case ID is SP-2025-04-891");
+    
+    if (!complaintType || (!location && !useCurrentLocation) || !description) {
+      toast({
+        title: "Missing information",
+        description: "Please fill all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // Generate a unique case ID
+    const caseId = `SP-2025-04-${Math.floor(Math.random() * 1000)}`;
+    
+    // Generate blockchain hash for secure record
+    const hash = generateBlockchainHash();
+    setBlockchainHash(hash);
+    
+    // Simulate API submission delay
+    setTimeout(() => {
+      setIsSubmitting(false);
+      
+      toast({
+        title: "Complaint submitted successfully!",
+        description: `Your case ID is ${caseId}`,
+        variant: "default",
+      });
+      
+      // Redirect to track page with the case ID
+      setTimeout(() => {
+        navigate(`/citizen/track?id=${caseId}`);
+      }, 2000);
+    }, 1500);
   };
 
   return (
@@ -116,6 +163,21 @@ const CitizenComplaint = () => {
                 </div>
               </div>
               
+              {blockchainHash && (
+                <div className="bg-success/10 border border-success/30 p-4 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <Check className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="text-sm font-medium text-success-light mb-1">Secured with Blockchain</h3>
+                      <p className="text-xs text-gray-300 mb-1">This complaint is securely recorded on blockchain</p>
+                      <div className="bg-police-800 p-2 rounded text-xs font-mono text-gray-300 overflow-x-auto">
+                        {blockchainHash}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="bg-police-700/50 p-4 rounded-lg flex items-start space-x-3">
                 <MessageSquare className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div>
@@ -143,7 +205,13 @@ const CitizenComplaint = () => {
               <Button variant="outline" className="bg-police-700 hover:bg-police-600 border-police-600">
                 Save as Draft
               </Button>
-              <Button type="submit" onClick={handleSubmit}>Submit Complaint</Button>
+              <Button 
+                type="submit" 
+                onClick={handleSubmit} 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Processing..." : "Submit Complaint"}
+              </Button>
             </div>
           </CardFooter>
         </Card>

@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Calendar, Filter, MapPin, Layers } from "lucide-react";
+import { AlertTriangle, Calendar, Filter, MapPin, Layers, Navigation } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,26 +11,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-// Placeholder for where we'd use Leaflet
-const Map: React.FC = () => {
-  return (
-    <div className="relative w-full h-[600px] rounded-lg overflow-hidden bg-police-800/50 border border-police-700">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center">
-          <MapPin className="h-12 w-12 text-primary mx-auto mb-3 opacity-60" />
-          <p className="text-gray-300">Map loading here with Leaflet.js</p>
-          <p className="text-xs text-gray-400 mt-2">This would be an interactive crime heatmap</p>
-        </div>
-      </div>
-    </div>
-  );
-};
+import CrimeHeatmap from "@/components/maps/CrimeHeatmap";
+import { useToast } from "@/hooks/use-toast";
 
 const CitizenSafetyMap = () => {
   const [crimeType, setCrimeType] = useState("all");
   const [timeRange, setTimeRange] = useState("24h");
   const [area, setArea] = useState("pune");
+  const { toast } = useToast();
+
+  const handleFindSafeRoute = () => {
+    toast({
+      title: "Safe Route Planner",
+      description: "Planning the safest route based on current crime data",
+    });
+  };
+
+  const handleAlertClick = (area: string) => {
+    toast({
+      title: `Alert: ${area}`,
+      description: "Showing details for active alert in this area",
+      variant: "destructive",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-police-950 to-police-900 text-white">
@@ -113,7 +116,7 @@ const CitizenSafetyMap = () => {
         {/* Map */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
-            <Map />
+            <CrimeHeatmap mapType="safety" />
           </div>
           
           <div className="space-y-6">
@@ -122,7 +125,10 @@ const CitizenSafetyMap = () => {
                 <CardTitle className="text-lg">Active Alerts</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-3 bg-alert/10 border border-alert/20 rounded-lg">
+                <div 
+                  className="p-3 bg-alert/10 border border-alert/20 rounded-lg cursor-pointer hover:bg-alert/20 transition-colors"
+                  onClick={() => handleAlertClick("MG Road Area")}
+                >
                   <div className="flex items-start space-x-2">
                     <AlertTriangle className="h-4 w-4 text-alert mt-0.5 flex-shrink-0" />
                     <div>
@@ -138,7 +144,10 @@ const CitizenSafetyMap = () => {
                   </div>
                 </div>
                 
-                <div className="p-3 bg-alert/10 border border-alert/20 rounded-lg">
+                <div 
+                  className="p-3 bg-alert/10 border border-alert/20 rounded-lg cursor-pointer hover:bg-alert/20 transition-colors"
+                  onClick={() => handleAlertClick("Koregaon Park")}
+                >
                   <div className="flex items-start space-x-2">
                     <AlertTriangle className="h-4 w-4 text-alert mt-0.5 flex-shrink-0" />
                     <div>
@@ -191,8 +200,8 @@ const CitizenSafetyMap = () => {
               </CardContent>
             </Card>
             
-            <Button className="w-full">
-              <MapPin className="h-4 w-4 mr-2" />
+            <Button className="w-full" onClick={handleFindSafeRoute}>
+              <Navigation className="h-4 w-4 mr-2" />
               Find Safe Route
             </Button>
           </div>

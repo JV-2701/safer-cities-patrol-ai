@@ -1,11 +1,14 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Clock, User, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Search, Clock, User, CheckCircle, AlertCircle, Loader2, FileText, Shield } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "react-router-dom";
 
+// Mock complaint data with enhanced blockchain details
 const mockComplaintData = {
   id: "SP-2025-04-782",
   type: "Theft",
@@ -15,6 +18,11 @@ const mockComplaintData = {
   status: "In Progress",
   confidence: 87,
   assignedTo: "Officer Praveen Sharma",
+  blockchain: {
+    hash: "0x8a21c5d78f41dd76de5e8bfc24b7adfe9d9c720aaf5d7611de48b86621a39574",
+    timestamp: "2025-04-15T14:32:47Z",
+    verificationCount: 12
+  },
   updates: [
     { date: "15 Apr 2025 - 14:32", text: "Complaint filed and received", status: "Filed" },
     { date: "15 Apr 2025 - 15:47", text: "Assigned to Officer Praveen Sharma", status: "Assigned" },
@@ -28,10 +36,26 @@ const CitizenTrack = () => {
   const [loading, setLoading] = useState(false);
   const [complaint, setComplaint] = useState<typeof mockComplaintData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const { toast } = useToast();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!caseId.trim()) {
+  // Check if case ID is in URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const idFromUrl = params.get("id");
+    
+    if (idFromUrl) {
+      setCaseId(idFromUrl);
+      handleSearch(null, idFromUrl);
+    }
+  }, [location]);
+
+  const handleSearch = (e: React.FormEvent | null, overrideCaseId?: string) => {
+    if (e) e.preventDefault();
+    
+    const searchId = overrideCaseId || caseId;
+    
+    if (!searchId.trim()) {
       setError("Please enter a valid Case ID");
       return;
     }
@@ -41,11 +65,20 @@ const CitizenTrack = () => {
     
     // Simulate API call
     setTimeout(() => {
-      if (caseId.startsWith("SP-")) {
+      if (searchId.startsWith("SP-")) {
         setComplaint(mockComplaintData);
+        toast({
+          title: "Complaint found",
+          description: `Displaying details for ${searchId}`,
+        });
       } else {
         setError("No complaint found with this Case ID");
         setComplaint(null);
+        toast({
+          title: "Search failed",
+          description: "No complaint found with this Case ID",
+          variant: "destructive",
+        });
       }
       setLoading(false);
     }, 1500);
@@ -161,11 +194,37 @@ const CitizenTrack = () => {
                   <p className="text-sm text-gray-400">Description</p>
                   <p className="mt-1">{complaint.description}</p>
                 </div>
+                
                 <div className="bg-police-700/50 p-3 rounded-lg flex items-center space-x-3">
                   <User className="h-5 w-5 text-primary flex-shrink-0" />
                   <div>
                     <p className="text-sm text-gray-300">Assigned To</p>
                     <p className="font-medium">{complaint.assignedTo}</p>
+                  </div>
+                </div>
+                
+                <div className="bg-primary/10 border border-primary/20 p-3 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="text-sm font-medium text-primary-foreground mb-1">Blockchain Verification</h3>
+                      <div className="grid grid-cols-2 gap-2 mb-2">
+                        <div>
+                          <p className="text-xs text-gray-400">Timestamp</p>
+                          <p className="text-xs">{new Date(complaint.blockchain.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400">Verifications</p>
+                          <p className="text-xs">{complaint.blockchain.verificationCount} nodes</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Transaction Hash</p>
+                        <p className="text-xs font-mono bg-police-800 p-1.5 rounded mt-1 overflow-x-auto">
+                          {complaint.blockchain.hash}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -191,6 +250,16 @@ const CitizenTrack = () => {
                 </div>
               </CardContent>
             </Card>
+            
+            <div className="flex space-x-3">
+              <Button className="flex-1" variant="outline" className="bg-police-700 hover:bg-police-600 border-police-600">
+                <FileText className="h-4 w-4 mr-2" />
+                Download Report
+              </Button>
+              <Button className="flex-1">
+                Contact Officer
+              </Button>
+            </div>
           </div>
         )}
       </main>

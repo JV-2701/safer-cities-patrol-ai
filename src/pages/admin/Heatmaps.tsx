@@ -10,7 +10,8 @@ import {
   Layers, 
   Info, 
   AlertTriangle, 
-  Download
+  Download,
+  Zap
 } from "lucide-react";
 import {
   Select,
@@ -19,20 +20,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-// Sample heatmap component (where we'd use Leaflet.js in a real app)
-const HeatMap = () => (
-  <div className="h-[600px] bg-police-800/50 rounded-lg border border-police-700 p-4 flex items-center justify-center">
-    <Map className="h-12 w-12 text-primary/40" />
-    <p className="text-sm text-gray-400 mt-2">Interactive crime heatmap would be here using Leaflet.js with DBSCAN clusters</p>
-  </div>
-);
+import CrimeHeatmap from "@/components/maps/CrimeHeatmap";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminHeatmaps = () => {
   const [mapType, setMapType] = useState("real-time");
   const [timeRange, setTimeRange] = useState("7d");
   const [crimeType, setCrimeType] = useState("all");
   const [area, setArea] = useState("all");
+  const { toast } = useToast();
+
+  const handleExportData = () => {
+    toast({
+      title: "Exporting Map Data",
+      description: "Your data is being prepared for download",
+    });
+  };
+
+  const handleDispatchPatrols = () => {
+    toast({
+      title: "Dispatching Patrols",
+      description: "Patrol units have been notified of high-risk areas",
+      variant: "default",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-police-950 to-police-900 text-white">
@@ -67,7 +78,7 @@ const AdminHeatmaps = () => {
             className={mapType !== "forecasted" ? "bg-police-700 hover:bg-police-600 border-police-600" : ""} 
             onClick={() => setMapType("forecasted")}
           >
-            <AlertTriangle className="h-4 w-4 mr-2" />
+            <Zap className="h-4 w-4 mr-2" />
             LSTM Predictions
           </Button>
         </div>
@@ -145,7 +156,9 @@ const AdminHeatmaps = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <HeatMap />
+                <CrimeHeatmap 
+                  mapType={mapType === "forecasted" ? "prediction" : "heatmap"} 
+                />
               </CardContent>
             </Card>
           </div>
@@ -246,7 +259,7 @@ const AdminHeatmaps = () => {
                   </>
                 )}
                 
-                <Button className="w-full">
+                <Button className="w-full" onClick={handleExportData}>
                   <Download className="h-4 w-4 mr-2" />
                   Export Map Data
                 </Button>
@@ -289,7 +302,11 @@ const AdminHeatmaps = () => {
                     <p className="text-xs text-gray-400 mt-1">Model Confidence: 76%</p>
                   </div>
                   
-                  <Button variant="outline" className="w-full bg-alert/20 hover:bg-alert/30 border-alert/30 text-white">
+                  <Button 
+                    variant="outline" 
+                    className="w-full bg-alert/20 hover:bg-alert/30 border-alert/30 text-white"
+                    onClick={handleDispatchPatrols}
+                  >
                     Dispatch Preventive Patrols
                   </Button>
                 </CardContent>
