@@ -4,6 +4,8 @@ import Navbar from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, FileText, Search, MapPin, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import CrimeHeatmap from "@/components/maps/CrimeHeatmap";
 
 const CitizenDashboard = () => {
   return (
@@ -38,9 +40,11 @@ const CitizenDashboard = () => {
               <FileText className="h-10 w-10 text-primary mb-4" />
               <h3 className="font-semibold mb-1">File a Complaint</h3>
               <p className="text-sm text-gray-300 mb-4">Report incidents or suspicions</p>
-              <Button variant="default" size="sm" className="mt-auto">
-                <FileText className="h-4 w-4 mr-2" />
-                Start Now
+              <Button variant="default" size="sm" className="mt-auto" asChild>
+                <Link to="/citizen/complaint">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Start Now
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -50,9 +54,11 @@ const CitizenDashboard = () => {
               <Search className="h-10 w-10 text-primary mb-4" />
               <h3 className="font-semibold mb-1">Track Complaint</h3>
               <p className="text-sm text-gray-300 mb-4">Check status of your reports</p>
-              <Button variant="default" size="sm" className="mt-auto">
-                <Search className="h-4 w-4 mr-2" />
-                Track Now
+              <Button variant="default" size="sm" className="mt-auto" asChild>
+                <Link to="/citizen/track">
+                  <Search className="h-4 w-4 mr-2" />
+                  Track Now
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -62,9 +68,11 @@ const CitizenDashboard = () => {
               <MapPin className="h-10 w-10 text-primary mb-4" />
               <h3 className="font-semibold mb-1">Safety Map</h3>
               <p className="text-sm text-gray-300 mb-4">View crime patterns near you</p>
-              <Button variant="default" size="sm" className="mt-auto">
-                <MapPin className="h-4 w-4 mr-2" />
-                Open Map
+              <Button variant="default" size="sm" className="mt-auto" asChild>
+                <Link to="/citizen/safety-map">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Open Map
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -98,13 +106,23 @@ const CitizenDashboard = () => {
                     }`}>
                       {complaint.status}
                     </span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white">
-                      <ChevronRight className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white" asChild>
+                      <Link to={`/citizen/track?id=${complaint.id}`}>
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+        
+        {/* Add heatmap section */}
+        <h2 className="text-xl font-semibold mb-4">Safety Heatmap</h2>
+        <Card className="bg-police-800/30 backdrop-blur-sm border-police-700 mb-8">
+          <CardContent className="p-6">
+            <CrimeHeatmap mapType="heatmap" height="400px" />
           </CardContent>
         </Card>
         

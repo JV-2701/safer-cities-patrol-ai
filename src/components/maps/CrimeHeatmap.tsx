@@ -8,8 +8,6 @@ interface CrimeHeatmapProps {
   height?: string;
 }
 
-// This is a placeholder component for a real Leaflet.js map
-// In a real app, we would use Leaflet.js or Mapbox here
 const CrimeHeatmap: React.FC<CrimeHeatmapProps> = ({ 
   mapType = "safety", 
   showControls = true,
@@ -17,7 +15,7 @@ const CrimeHeatmap: React.FC<CrimeHeatmapProps> = ({
 }) => {
   return (
     <div 
-      className={`relative w-full rounded-lg overflow-hidden bg-police-800/50 border border-police-700`}
+      className="relative w-full rounded-lg overflow-hidden bg-police-800/50 border border-police-700"
       style={{ height }}
     >
       {/* This would be replaced with a real Leaflet map */}
