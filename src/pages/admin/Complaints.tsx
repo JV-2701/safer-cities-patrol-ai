@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,8 @@ import {
   Shield,
   ChevronDown,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Download
 } from "lucide-react";
 import {
   Select,
@@ -24,8 +24,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import StatusUpdateForm from "@/components/admin/StatusUpdateForm";
+import { PDFDownloader } from "@/components/admin/PDFDownloader";
 
 const AdminComplaints = () => {
+  const [complaintTimeline, setComplaintTimeline] = useState([
+    { date: "15 Apr 2025 - 14:32", text: "Complaint filed and received", status: "Filed" },
+    { date: "15 Apr 2025 - 15:47", text: "Assigned to Officer Praveen Sharma", status: "Assigned" },
+    { date: "16 Apr 2025 - 10:15", text: "Initial investigation started", status: "In Progress" },
+    { date: "16 Apr 2025 - 16:30", text: "CCTV footage collected from area", status: "In Progress" }
+  ]);
+  
+  const { toast } = useToast();
+  
+  const handleStatusUpdate = (status: string, title: string, details: string) => {
+    const now = new Date();
+    const formattedDate = `${now.getDate()} Apr 2025 - ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    let statusText = "In Progress";
+    if (status === "review") statusText = "Under Review";
+    if (status === "resolved") statusText = "Resolved";
+    if (status === "closed") statusText = "Closed";
+    
+    const newUpdate = {
+      date: formattedDate,
+      text: details || title,
+      status: statusText
+    };
+    
+    setComplaintTimeline([...complaintTimeline, newUpdate]);
+  };
+  
+  const handleExportData = () => {
+    toast({
+      title: "Data exported",
+      description: "Complaint data has been exported successfully"
+    });
+  };
+  
+  const handleViewComplaint = (id: string) => {
+    // In a real app, this would navigate to the complaint detail view
+    toast({
+      title: "Viewing complaint",
+      description: `Viewing details for complaint ${id}`
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-police-950 to-police-900 text-white">
       <Navbar type="admin" />
@@ -116,9 +161,16 @@ const AdminComplaints = () => {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Recent Complaints</CardTitle>
-              <Button variant="outline" size="sm" className="bg-police-700 hover:bg-police-600 border-police-600">
-                Export Data
-              </Button>
+              <PDFDownloader 
+                filename="complaints-data.pdf"
+                documentTitle="Complaints Report"
+                content="complaints"
+              >
+                <Button variant="outline" size="sm" className="bg-police-700 hover:bg-police-600 border-police-600">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Data
+                </Button>
+              </PDFDownloader>
             </div>
           </CardHeader>
           <CardContent>
@@ -153,7 +205,14 @@ const AdminComplaints = () => {
                     </td>
                     <td>Officer Sharma</td>
                     <td className="pr-4">
-                      <Button variant="ghost" size="sm" className="h-8 px-2">View</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2"
+                        onClick={() => handleViewComplaint("SP-2025-04-782")}
+                      >
+                        View
+                      </Button>
                     </td>
                   </tr>
                   
@@ -172,7 +231,14 @@ const AdminComplaints = () => {
                     </td>
                     <td>Officer Joshi</td>
                     <td className="pr-4">
-                      <Button variant="ghost" size="sm" className="h-8 px-2">View</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2"
+                        onClick={() => handleViewComplaint("SP-2025-04-781")}
+                      >
+                        View
+                      </Button>
                     </td>
                   </tr>
                   
@@ -191,7 +257,14 @@ const AdminComplaints = () => {
                     </td>
                     <td>Officer Patil</td>
                     <td className="pr-4">
-                      <Button variant="ghost" size="sm" className="h-8 px-2">View</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2"
+                        onClick={() => handleViewComplaint("SP-2025-04-780")}
+                      >
+                        View
+                      </Button>
                     </td>
                   </tr>
                   
@@ -210,7 +283,14 @@ const AdminComplaints = () => {
                     </td>
                     <td>Officer Khan</td>
                     <td className="pr-4">
-                      <Button variant="ghost" size="sm" className="h-8 px-2">View</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2"
+                        onClick={() => handleViewComplaint("SP-2025-04-779")}
+                      >
+                        View
+                      </Button>
                     </td>
                   </tr>
                   
@@ -229,7 +309,14 @@ const AdminComplaints = () => {
                     </td>
                     <td>Unassigned</td>
                     <td className="pr-4">
-                      <Button variant="ghost" size="sm" className="h-8 px-2">View</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2"
+                        onClick={() => handleViewComplaint("SP-2025-04-778")}
+                      >
+                        View
+                      </Button>
                     </td>
                   </tr>
                 </tbody>
@@ -243,10 +330,22 @@ const AdminComplaints = () => {
           <div className="lg:col-span-2">
             <Card className="bg-police-800/40 backdrop-blur-lg border-police-700">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center">
-                  <FileText className="h-5 w-5 text-primary mr-2" />
-                  Complaint Details: SP-2025-04-782
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center">
+                    <FileText className="h-5 w-5 text-primary mr-2" />
+                    Complaint Details: SP-2025-04-782
+                  </CardTitle>
+                  <PDFDownloader 
+                    filename="complaint-details.pdf"
+                    documentTitle="Complaint SP-2025-04-782 Details"
+                    content="complaint details"
+                  >
+                    <Button variant="outline" size="sm" className="bg-police-700 hover:bg-police-600 border-police-600">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export Details
+                    </Button>
+                  </PDFDownloader>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -367,53 +466,19 @@ const AdminComplaints = () => {
               </CardHeader>
               <CardContent>
                 <div className="relative pl-8 space-y-8 before:absolute before:inset-y-0 before:left-3 before:w-0.5 before:bg-police-700">
-                  <div className="relative">
-                    <div className="absolute -left-8 mt-1.5 h-4 w-4 rounded-full border border-blue-500 bg-police-900"></div>
-                    <div className="mb-1 flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-400" />
-                      <time className="text-xs text-gray-400">15 Apr 2025 - 14:32</time>
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-200">
-                        Filed
-                      </span>
+                  {complaintTimeline.map((update, index) => (
+                    <div className="relative" key={index}>
+                      <div className="absolute -left-8 mt-1.5 h-4 w-4 rounded-full border border-blue-500 bg-police-900"></div>
+                      <div className="mb-1 flex items-center space-x-2">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <time className="text-xs text-gray-400">{update.date}</time>
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-200">
+                          {update.status}
+                        </span>
+                      </div>
+                      <p className="text-sm">{update.text}</p>
                     </div>
-                    <p className="text-sm">Complaint filed and received</p>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-8 mt-1.5 h-4 w-4 rounded-full border border-yellow-500 bg-police-900"></div>
-                    <div className="mb-1 flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-400" />
-                      <time className="text-xs text-gray-400">15 Apr 2025 - 15:47</time>
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-200">
-                        Assigned
-                      </span>
-                    </div>
-                    <p className="text-sm">Assigned to Officer Praveen Sharma</p>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-8 mt-1.5 h-4 w-4 rounded-full border border-yellow-500 bg-police-900"></div>
-                    <div className="mb-1 flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-400" />
-                      <time className="text-xs text-gray-400">16 Apr 2025 - 10:15</time>
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-200">
-                        In Progress
-                      </span>
-                    </div>
-                    <p className="text-sm">Initial investigation started</p>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-8 mt-1.5 h-4 w-4 rounded-full border border-yellow-500 bg-police-900"></div>
-                    <div className="mb-1 flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-400" />
-                      <time className="text-xs text-gray-400">16 Apr 2025 - 16:30</time>
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-200">
-                        In Progress
-                      </span>
-                    </div>
-                    <p className="text-sm">CCTV footage collected from area</p>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -423,33 +488,7 @@ const AdminComplaints = () => {
                 <CardTitle className="text-lg">Add Status Update</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Select defaultValue="in-progress">
-                  <SelectTrigger className="bg-police-800 border-police-700 text-white">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-police-800 border-police-700 text-white">
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="review">Under Review</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Input 
-                  placeholder="Update title..." 
-                  className="bg-police-800 border-police-700 text-white"
-                />
-                
-                <textarea 
-                  placeholder="Add details about the status update..." 
-                  className="w-full px-3 py-2 bg-police-800 border border-police-700 text-white rounded-md focus:outline-none focus:ring-1 focus:ring-primary h-24"
-                />
-                
-                <div className="flex justify-end">
-                  <Button>
-                    Add Update
-                  </Button>
-                </div>
+                <StatusUpdateForm onStatusUpdate={handleStatusUpdate} />
               </CardContent>
             </Card>
             

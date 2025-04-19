@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,26 +14,38 @@ import {
   Shield, 
   Calendar,
   ArrowUpRight,
-  FileText
+  FileText,
+  Download
 } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import CrimeHeatmap from "@/components/maps/CrimeHeatmap";
+import DateRangeDialog from "@/components/admin/DateRangeDialog";
+import NotificationsDialog from "@/components/admin/NotificationsDialog";
+import { PDFDownloader } from "@/components/admin/PDFDownloader";
 
-// Sample chart component (where we'd use Recharts in a real app)
-const StatisticsChart = () => (
-  <div className="h-64 bg-police-800/50 rounded-lg border border-police-700 p-4 flex items-center justify-center">
-    <BarChart className="h-12 w-12 text-primary/40" />
-    <p className="text-sm text-gray-400 mt-2">Chart visualization would be here using Recharts</p>
-  </div>
-);
+// Sample chart data
+const crimeData = [
+  { name: 'Mon', theft: 4, assault: 2, burglary: 6, noise: 8 },
+  { name: 'Tue', theft: 6, assault: 3, burglary: 4, noise: 7 },
+  { name: 'Wed', theft: 8, assault: 4, burglary: 3, noise: 5 },
+  { name: 'Thu', theft: 7, assault: 6, burglary: 5, noise: 4 },
+  { name: 'Fri', theft: 9, assault: 5, burglary: 7, noise: 6 },
+  { name: 'Sat', theft: 11, assault: 7, burglary: 4, noise: 5 },
+  { name: 'Sun', theft: 5, assault: 4, burglary: 2, noise: 3 },
+];
 
-// Sample map component (where we'd use Leaflet in a real app)
-const PatrolMap = () => (
-  <div className="h-96 bg-police-800/50 rounded-lg border border-police-700 p-4 flex items-center justify-center">
-    <MapPin className="h-12 w-12 text-primary/40" />
-    <p className="text-sm text-gray-400 mt-2">Interactive patrol map would be here using Leaflet</p>
-  </div>
-);
+// Sample patrol data
+const patrolData = [
+  { name: 'Team Alpha', dispatches: 12, resolutions: 10, effectiveness: 83 },
+  { name: 'Team Beta', dispatches: 9, resolutions: 8, effectiveness: 89 },
+  { name: 'Team Delta', dispatches: 15, resolutions: 12, effectiveness: 80 },
+  { name: 'Team Echo', dispatches: 8, resolutions: 7, effectiveness: 88 },
+];
 
 const AdminDashboard = () => {
+  const [dateDialogOpen, setDateDialogOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-police-950 to-police-900 text-white">
       <Navbar type="admin" />
@@ -46,15 +58,32 @@ const AdminDashboard = () => {
           </div>
           
           <div className="flex items-center space-x-3">
-            <Button variant="outline" className="bg-police-800 border-police-700">
+            <Button 
+              variant="outline" 
+              className="bg-police-800 border-police-700"
+              onClick={() => setDateDialogOpen(true)}
+            >
               <Calendar className="h-4 w-4 mr-2" />
               Today
             </Button>
-            <Button variant="default">
+            <Button 
+              variant="default"
+              onClick={() => setNotificationsOpen(true)}
+            >
               <Bell className="h-4 w-4 mr-2" />
               Notifications
               <span className="ml-2 bg-police-800 text-white text-xs px-1.5 py-0.5 rounded-full">4</span>
             </Button>
+            <PDFDownloader 
+              filename="dashboard-report.pdf" 
+              documentTitle="Police Dashboard Report"
+              content="dashboard"
+            >
+              <Button variant="outline" className="bg-police-800 border-police-700">
+                <Download className="h-4 w-4 mr-2" />
+                Export Report
+              </Button>
+            </PDFDownloader>
           </div>
         </div>
         
@@ -140,13 +169,19 @@ const AdminDashboard = () => {
           <div className="lg:col-span-2">
             <Card className="bg-police-800/30 backdrop-blur-sm border-police-700">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center">
-                  <MapPin className="h-5 w-5 text-primary mr-2" />
-                  Real-time Patrol Map
-                </CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg flex items-center">
+                    <MapPin className="h-5 w-5 text-primary mr-2" />
+                    Real-time Patrol Map
+                  </CardTitle>
+                  <Button variant="outline" size="sm" className="bg-police-700 hover:bg-police-600 border-police-600">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Map
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <PatrolMap />
+                <CrimeHeatmap mapType="patrol" height="400px" />
               </CardContent>
             </Card>
           </div>
@@ -228,13 +263,92 @@ const AdminDashboard = () => {
         {/* Statistics */}
         <Card className="bg-police-800/30 backdrop-blur-sm border-police-700 mb-8">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <BarChart className="h-5 w-5 text-primary mr-2" />
-              Crime Statistics (Last 7 Days)
-            </CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg flex items-center">
+                <BarChart className="h-5 w-5 text-primary mr-2" />
+                Crime Statistics (Last 7 Days)
+              </CardTitle>
+              <Button variant="outline" size="sm" className="bg-police-700 hover:bg-police-600 border-police-600">
+                <Download className="h-4 w-4 mr-2" />
+                Export Data
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <StatisticsChart />
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={crimeData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+                  <XAxis dataKey="name" stroke="#999" />
+                  <YAxis stroke="#999" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#2A2A2A', borderColor: '#444', color: '#FFF' }} 
+                  />
+                  <Legend />
+                  <Line type="monotone" dataKey="theft" stroke="#8884d8" activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="assault" stroke="#ea384c" />
+                  <Line type="monotone" dataKey="burglary" stroke="#82ca9d" />
+                  <Line type="monotone" dataKey="noise" stroke="#ffc658" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Patrol Effectiveness */}
+        <Card className="bg-police-800/30 backdrop-blur-sm border-police-700 mb-8">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg flex items-center">
+                <Shield className="h-5 w-5 text-primary mr-2" />
+                Patrol Effectiveness Analysis
+              </CardTitle>
+              <Button variant="outline" size="sm" className="bg-police-700 hover:bg-police-600 border-police-600">
+                <Download className="h-4 w-4 mr-2" />
+                Export Report
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left border-b border-police-700">
+                    <th className="pb-3 font-medium text-gray-300">Patrol Team</th>
+                    <th className="pb-3 font-medium text-gray-300">Dispatches</th>
+                    <th className="pb-3 font-medium text-gray-300">Resolutions</th>
+                    <th className="pb-3 font-medium text-gray-300">Effectiveness</th>
+                    <th className="pb-3 font-medium text-gray-300">Trend</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-200">
+                  {patrolData.map((team) => (
+                    <tr key={team.name} className="border-b border-police-800">
+                      <td className="py-3">{team.name}</td>
+                      <td>{team.dispatches}</td>
+                      <td>{team.resolutions}</td>
+                      <td>
+                        <div className="flex items-center">
+                          <div className="w-24 bg-police-700 rounded-full h-2 mr-2">
+                            <div 
+                              className="bg-primary rounded-full h-2" 
+                              style={{ width: `${team.effectiveness}%` }}
+                            ></div>
+                          </div>
+                          <span>{team.effectiveness}%</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="flex items-center text-success">
+                          <ArrowUpRight className="h-4 w-4 mr-1" />
+                          +3%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
         
@@ -327,6 +441,17 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </main>
+      
+      {/* Dialogs */}
+      <DateRangeDialog 
+        open={dateDialogOpen} 
+        onOpenChange={setDateDialogOpen} 
+      />
+      
+      <NotificationsDialog 
+        open={notificationsOpen} 
+        onOpenChange={setNotificationsOpen} 
+      />
     </div>
   );
 };
