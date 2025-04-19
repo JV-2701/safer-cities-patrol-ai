@@ -17,6 +17,7 @@ import CitizenSafetyMap from "./pages/citizen/SafetyMap";
 import CitizenGuidelines from "./pages/citizen/Guidelines";
 import CitizenCommunity from "./pages/citizen/Community";
 import CitizenGallery from "./pages/citizen/Gallery";
+import CitizenHelp from "./pages/citizen/Help";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/Login";
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/citizen/guidelines" element={<CitizenGuidelines />} />
           <Route path="/citizen/community" element={<CitizenCommunity />} />
           <Route path="/citizen/gallery" element={<CitizenGallery />} />
+          <Route path="/citizen/help" element={<CitizenHelp />} />
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
