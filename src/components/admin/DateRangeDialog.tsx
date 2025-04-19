@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, Di
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface DateRangeDialogProps {
   open: boolean;
@@ -12,9 +13,14 @@ interface DateRangeDialogProps {
 
 const DateRangeDialog: React.FC<DateRangeDialogProps> = ({ open, onOpenChange }) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const { toast } = useToast();
   
   const handleApply = () => {
     // In a real app, this would update the dashboard data with the selected date
+    toast({
+      title: "Date Filter Applied",
+      description: `Dashboard data updated for ${date ? format(date, "PPP") : "today"}`,
+    });
     onOpenChange(false);
   };
   

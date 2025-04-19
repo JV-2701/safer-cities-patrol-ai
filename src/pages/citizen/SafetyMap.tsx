@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Calendar, Filter, MapPin, Layers, Navigation } from "lucide-react";
+import { AlertTriangle, Calendar, Filter, MapPin, Layers, Navigation, Download, Route } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,17 +13,30 @@ import {
 } from "@/components/ui/select";
 import CrimeHeatmap from "@/components/maps/CrimeHeatmap";
 import { useToast } from "@/hooks/use-toast";
+import { PDFDownloader } from "@/components/admin/PDFDownloader";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const CitizenSafetyMap = () => {
   const [crimeType, setCrimeType] = useState("all");
   const [timeRange, setTimeRange] = useState("24h");
   const [area, setArea] = useState("pune");
+  const [routePlannerOpen, setRoutePlannerOpen] = useState(false);
+  const [mapLayers, setMapLayers] = useState({
+    crimeHeatmap: true,
+    policeStations: false,
+    patrolRoutes: false,
+    safeCorridors: false
+  });
   const { toast } = useToast();
 
   const handleFindSafeRoute = () => {
+    setRoutePlannerOpen(true);
+  };
+
+  const handleFilterApply = () => {
     toast({
-      title: "Safe Route Planner",
-      description: "Planning the safest route based on current crime data",
+      title: "Filters Applied",
+      description: `Showing ${crimeType} incidents in the ${area} area for the last ${timeRange}`,
     });
   };
 
@@ -34,6 +47,120 @@ const CitizenSafetyMap = () => {
       variant: "destructive",
     });
   };
+
+  const toggleMapLayer = (layer: keyof typeof mapLayers) => {
+    setMapLayers(prev => ({
+      ...prev,
+      [layer]: !prev[layer]
+    }));
+
+    toast({
+      title: `Layer ${mapLayers[layer] ? "Hidden" : "Shown"}`,
+      description: `The ${layer} layer has been ${mapLayers[layer] ? "hidden" : "shown"} on the map`,
+    });
+  };
+
+  const SafeRoutePlanner = () => (
+    <Dialog open={routePlannerOpen} onOpenChange={setRoutePlannerOpen}>
+      <DialogContent className="bg-police-900 border-police-700 text-white">
+        <DialogHeader>
+          <DialogTitle>Safe Route Planner</DialogTitle>
+          <DialogDescription className="text-gray-400">
+            Plan the safest route for your journey
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Starting Point</label>
+            <Select defaultValue="current">
+              <SelectTrigger className="bg-police-800 border-police-700 text-white">
+                <SelectValue placeholder="Select starting point" />
+              </SelectTrigger>
+              <SelectContent className="bg-police-800 border-police-700 text-white">
+                <SelectItem value="current">Current Location</SelectItem>
+                <SelectItem value="koregaon">Koregaon Park</SelectItem>
+                <SelectItem value="aundh">Aundh</SelectItem>
+                <SelectItem value="mg-road">MG Road</SelectItem>
+                <SelectItem value="viman">Viman Nagar</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Destination</label>
+            <Select defaultValue="mg-road">
+              <SelectTrigger className="bg-police-800 border-police-700 text-white">
+                <SelectValue placeholder="Select destination" />
+              </SelectTrigger>
+              <SelectContent className="bg-police-800 border-police-700 text-white">
+                <SelectItem value="koregaon">Koregaon Park</SelectItem>
+                <SelectItem value="aundh">Aundh</SelectItem>
+                <SelectItem value="mg-road">MG Road</SelectItem>
+                <SelectItem value="viman">Viman Nagar</SelectItem>
+                <SelectItem value="shivaji">Shivaji Nagar</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Travel Method</label>
+            <Select defaultValue="car">
+              <SelectTrigger className="bg-police-800 border-police-700 text-white">
+                <SelectValue placeholder="Select travel method" />
+              </SelectTrigger>
+              <SelectContent className="bg-police-800 border-police-700 text-white">
+                <SelectItem value="car">Car</SelectItem>
+                <SelectItem value="public">Public Transport</SelectItem>
+                <SelectItem value="walk">Walking</SelectItem>
+                <SelectItem value="bike">Bike</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Time of Travel</label>
+            <Select defaultValue="now">
+              <SelectTrigger className="bg-police-800 border-police-700 text-white">
+                <SelectValue placeholder="Select time" />
+              </SelectTrigger>
+              <SelectContent className="bg-police-800 border-police-700 text-white">
+                <SelectItem value="now">Now</SelectItem>
+                <SelectItem value="morning">Morning (6AM-10AM)</SelectItem>
+                <SelectItem value="afternoon">Afternoon (10AM-4PM)</SelectItem>
+                <SelectItem value="evening">Evening (4PM-8PM)</SelectItem>
+                <SelectItem value="night">Night (8PM-6AM)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="pt-4 flex space-x-2">
+            <Button 
+              className="flex-1"
+              onClick={() => {
+                toast({
+                  title: "Safe Route Generated",
+                  description: "Your safest route has been calculated and shown on the map",
+                });
+                setRoutePlannerOpen(false);
+              }}
+            >
+              <Route className="h-4 w-4 mr-2" />
+              Generate Route
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="flex-1 bg-police-800 border-police-700"
+              onClick={() => setRoutePlannerOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-police-950 to-police-900 text-white">
@@ -110,6 +237,10 @@ const CitizenSafetyMap = () => {
                 </Select>
               </div>
             </div>
+            
+            <Button onClick={handleFilterApply} className="mt-4">
+              Apply Filters
+            </Button>
           </CardContent>
         </Card>
         
@@ -175,38 +306,74 @@ const CitizenSafetyMap = () => {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm">Crime Heatmap</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Active
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${mapLayers.crimeHeatmap ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleMapLayer('crimeHeatmap')}
+                  >
+                    {mapLayers.crimeHeatmap ? 'Active' : 'Show'}
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <label className="text-sm">Police Stations</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Show
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${mapLayers.policeStations ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleMapLayer('policeStations')}
+                  >
+                    {mapLayers.policeStations ? 'Active' : 'Show'}
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <label className="text-sm">Patrol Routes</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Hide
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${mapLayers.patrolRoutes ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleMapLayer('patrolRoutes')}
+                  >
+                    {mapLayers.patrolRoutes ? 'Active' : 'Show'}
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <label className="text-sm">Safe Corridors</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Show
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${mapLayers.safeCorridors ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleMapLayer('safeCorridors')}
+                  >
+                    {mapLayers.safeCorridors ? 'Active' : 'Show'}
                   </Button>
                 </div>
               </CardContent>
             </Card>
             
-            <Button className="w-full" onClick={handleFindSafeRoute}>
-              <Navigation className="h-4 w-4 mr-2" />
-              Find Safe Route
-            </Button>
+            <div className="space-y-3">
+              <Button className="w-full" onClick={handleFindSafeRoute}>
+                <Navigation className="h-4 w-4 mr-2" />
+                Find Safe Route
+              </Button>
+              
+              <PDFDownloader 
+                filename="safety-map-report.pdf" 
+                documentTitle="Safety Map Report"
+                content="safety"
+              >
+                <Button variant="outline" className="w-full bg-police-800 border-police-700">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Safety Report
+                </Button>
+              </PDFDownloader>
+            </div>
           </div>
         </div>
       </main>
+      
+      {/* Safe Route Planner Dialog */}
+      <SafeRoutePlanner />
     </div>
   );
 };

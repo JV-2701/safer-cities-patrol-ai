@@ -11,7 +11,9 @@ import {
   Info, 
   AlertTriangle, 
   Download,
-  Zap
+  Zap,
+  Users,
+  Shield
 } from "lucide-react";
 import {
   Select,
@@ -22,12 +24,22 @@ import {
 } from "@/components/ui/select";
 import CrimeHeatmap from "@/components/maps/CrimeHeatmap";
 import { useToast } from "@/hooks/use-toast";
+import { PDFDownloader } from "@/components/admin/PDFDownloader";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const AdminHeatmaps = () => {
   const [mapType, setMapType] = useState("real-time");
   const [timeRange, setTimeRange] = useState("7d");
   const [crimeType, setCrimeType] = useState("all");
   const [area, setArea] = useState("all");
+  const [activeLayers, setActiveLayers] = useState({
+    crimeHeatmap: true,
+    dbscanClusters: false,
+    policeStations: false,
+    wardBoundaries: false,
+    patrolRoutes: false
+  });
+  const [showDispatchDialog, setShowDispatchDialog] = useState(false);
   const { toast } = useToast();
 
   const handleExportData = () => {
@@ -37,13 +49,127 @@ const AdminHeatmaps = () => {
     });
   };
 
-  const handleDispatchPatrols = () => {
+  const handleApplyFilters = () => {
     toast({
-      title: "Dispatching Patrols",
-      description: "Patrol units have been notified of high-risk areas",
-      variant: "default",
+      title: "Filters Applied",
+      description: `Showing ${crimeType} data for ${area} in the last ${timeRange}`,
     });
   };
+
+  const handleDispatchPatrols = () => {
+    setShowDispatchDialog(true);
+  };
+
+  const toggleLayer = (layer: keyof typeof activeLayers) => {
+    setActiveLayers(prev => ({
+      ...prev,
+      [layer]: !prev[layer]
+    }));
+    
+    toast({
+      title: `${activeLayers[layer] ? "Hiding" : "Showing"} ${layer} layer`,
+      description: `The ${layer} layer has been ${activeLayers[layer] ? "hidden" : "shown"} on the map`,
+    });
+  };
+
+  const DispatchPatrolsDialog = () => (
+    <Dialog open={showDispatchDialog} onOpenChange={setShowDispatchDialog}>
+      <DialogContent className="bg-police-900 border-police-700 text-white">
+        <DialogHeader>
+          <DialogTitle>Dispatch Preventive Patrols</DialogTitle>
+          <DialogDescription className="text-gray-400">
+            Select patrol units to dispatch to high-risk areas
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 py-2">
+          <div className="p-3 bg-police-800/50 rounded-lg border border-police-700">
+            <h3 className="text-sm font-medium mb-2">MG Road, Central Pune</h3>
+            <p className="text-xs text-gray-300 mb-3">Predicted Crime Type: Theft (89% confidence)</p>
+            
+            <div className="space-y-2">
+              <label className="text-sm">Assign Patrol Unit</label>
+              <Select defaultValue="alpha">
+                <SelectTrigger className="bg-police-800 border-police-700 text-white">
+                  <SelectValue placeholder="Select unit" />
+                </SelectTrigger>
+                <SelectContent className="bg-police-800 border-police-700 text-white">
+                  <SelectItem value="alpha">Alpha Team</SelectItem>
+                  <SelectItem value="bravo">Bravo Team</SelectItem>
+                  <SelectItem value="charlie">Charlie Team</SelectItem>
+                  <SelectItem value="delta">Delta Team</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="p-3 bg-police-800/50 rounded-lg border border-police-700">
+            <h3 className="text-sm font-medium mb-2">Koregaon Park, East Pune</h3>
+            <p className="text-xs text-gray-300 mb-3">Predicted Crime Type: Vehicle Theft (81% confidence)</p>
+            
+            <div className="space-y-2">
+              <label className="text-sm">Assign Patrol Unit</label>
+              <Select defaultValue="bravo">
+                <SelectTrigger className="bg-police-800 border-police-700 text-white">
+                  <SelectValue placeholder="Select unit" />
+                </SelectTrigger>
+                <SelectContent className="bg-police-800 border-police-700 text-white">
+                  <SelectItem value="alpha">Alpha Team</SelectItem>
+                  <SelectItem value="bravo">Bravo Team</SelectItem>
+                  <SelectItem value="charlie">Charlie Team</SelectItem>
+                  <SelectItem value="delta">Delta Team</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="p-3 bg-police-800/50 rounded-lg border border-police-700">
+            <h3 className="text-sm font-medium mb-2">Aundh, West Pune</h3>
+            <p className="text-xs text-gray-300 mb-3">Predicted Crime Type: Burglary (76% confidence)</p>
+            
+            <div className="space-y-2">
+              <label className="text-sm">Assign Patrol Unit</label>
+              <Select defaultValue="charlie">
+                <SelectTrigger className="bg-police-800 border-police-700 text-white">
+                  <SelectValue placeholder="Select unit" />
+                </SelectTrigger>
+                <SelectContent className="bg-police-800 border-police-700 text-white">
+                  <SelectItem value="alpha">Alpha Team</SelectItem>
+                  <SelectItem value="bravo">Bravo Team</SelectItem>
+                  <SelectItem value="charlie">Charlie Team</SelectItem>
+                  <SelectItem value="delta">Delta Team</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="pt-4 flex space-x-3">
+            <Button 
+              className="flex-1"
+              onClick={() => {
+                toast({
+                  title: "Patrols Dispatched",
+                  description: "Patrol units have been notified of high-risk areas",
+                });
+                setShowDispatchDialog(false);
+              }}
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              Dispatch Patrols
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="flex-1 bg-police-800 hover:bg-police-700 border-police-700"
+              onClick={() => setShowDispatchDialog(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-police-950 to-police-900 text-white">
@@ -139,7 +265,7 @@ const AdminHeatmaps = () => {
               </div>
               
               <div className="flex items-end">
-                <Button className="w-full">Apply Filters</Button>
+                <Button className="w-full" onClick={handleApplyFilters}>Apply Filters</Button>
               </div>
             </div>
           </CardContent>
@@ -174,32 +300,57 @@ const AdminHeatmaps = () => {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm">Crime Heatmap</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Active
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${activeLayers.crimeHeatmap ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleLayer('crimeHeatmap')}
+                  >
+                    {activeLayers.crimeHeatmap ? 'Active' : 'Show'}
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <label className="text-sm">DBSCAN Clusters</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Show
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${activeLayers.dbscanClusters ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleLayer('dbscanClusters')}
+                  >
+                    {activeLayers.dbscanClusters ? 'Active' : 'Show'}
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <label className="text-sm">Police Stations</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Show
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${activeLayers.policeStations ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleLayer('policeStations')}
+                  >
+                    {activeLayers.policeStations ? 'Active' : 'Show'}
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <label className="text-sm">Ward Boundaries</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Hide
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${activeLayers.wardBoundaries ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleLayer('wardBoundaries')}
+                  >
+                    {activeLayers.wardBoundaries ? 'Active' : 'Show'}
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <label className="text-sm">Patrol Routes</label>
-                  <Button variant="outline" size="sm" className="h-7 text-xs bg-police-700 hover:bg-police-600 border-police-600">
-                    Show
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-7 text-xs ${activeLayers.patrolRoutes ? 'bg-primary/20 hover:bg-primary/30 border-primary/20' : 'bg-police-700 hover:bg-police-600 border-police-600'}`}
+                    onClick={() => toggleLayer('patrolRoutes')}
+                  >
+                    {activeLayers.patrolRoutes ? 'Active' : 'Show'}
                   </Button>
                 </div>
               </CardContent>
@@ -259,10 +410,16 @@ const AdminHeatmaps = () => {
                   </>
                 )}
                 
-                <Button className="w-full" onClick={handleExportData}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Map Data
-                </Button>
+                <PDFDownloader 
+                  filename="heatmap-data.pdf" 
+                  documentTitle="Crime Heatmap Analysis"
+                  content="heatmap"
+                >
+                  <Button className="w-full">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Map Data
+                  </Button>
+                </PDFDownloader>
               </CardContent>
             </Card>
             
@@ -307,6 +464,7 @@ const AdminHeatmaps = () => {
                     className="w-full bg-alert/20 hover:bg-alert/30 border-alert/30 text-white"
                     onClick={handleDispatchPatrols}
                   >
+                    <Users className="h-4 w-4 mr-2" />
                     Dispatch Preventive Patrols
                   </Button>
                 </CardContent>
@@ -315,6 +473,9 @@ const AdminHeatmaps = () => {
           </div>
         </div>
       </main>
+      
+      {/* Dispatch Patrols Dialog */}
+      <DispatchPatrolsDialog />
     </div>
   );
 };
