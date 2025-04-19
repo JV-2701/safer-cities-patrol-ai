@@ -18,7 +18,7 @@ const CrimeHeatmap: React.FC<CrimeHeatmapProps> = ({
       className="relative w-full rounded-lg overflow-hidden bg-police-800/50 border border-police-700"
       style={{ height }}
     >
-      {/* This would be replaced with a real Leaflet map */}
+      {/* Map placeholder */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
           <Map className="h-12 w-12 text-primary mx-auto mb-3 opacity-60" />
@@ -28,13 +28,10 @@ const CrimeHeatmap: React.FC<CrimeHeatmapProps> = ({
             {mapType === "patrol" && "Patrol Routes and Coverage"}
             {mapType === "prediction" && "AI-Predicted Crime Hotspots"}
           </p>
-          <p className="text-xs text-gray-400 mt-2">
-            This would be an interactive map using Leaflet.js or Mapbox
-          </p>
         </div>
       </div>
       
-      {/* Sample alerts that would be real data points on the map */}
+      {/* Sample alerts */}
       {mapType === "safety" && (
         <>
           <div className="absolute top-1/4 left-1/3">
